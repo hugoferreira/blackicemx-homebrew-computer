@@ -1,0 +1,5 @@
+set_io clk 60
+
+set_io hsync 104
+set_io vsync 102
+set_io rgb 49
