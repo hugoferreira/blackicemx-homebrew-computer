@@ -1,4 +1,4 @@
-INCLUDE_FILES = lib/*.v
+INCLUDE_FILES = lib/*.v lib/*.hex
 TOP_LEVEL = video.v
 PCF_FILE = video.pcf
 TARGET_FREQ = 50
@@ -13,7 +13,7 @@ bin/toplevel.asc: ${PCF_FILE} bin/toplevel.json
 
 bin/toplevel.json: ${TOP_LEVEL} ${INCLUDE_FILES}
 	mkdir -p bin
-	yosys -q -p "synth_ice40 -json bin/toplevel.json" ${TOP_LEVEL}
+	yosys -q -p "synth_ice40 -json bin/toplevel.json" ${TOP_LEVEL} 
 
 .PHONY: stat
 stat: bin/toplevel.asc

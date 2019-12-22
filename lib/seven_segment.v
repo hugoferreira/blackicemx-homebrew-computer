@@ -11,20 +11,6 @@ module seven_segment_decoder(
         segments = map[digit];
 endmodule
 
-module digits_to_bitmap(
-    input [3:0] digit,
-    input [2:0] line,
-    output reg [4:0] bits);
-
-    reg [4:0] font [0:127];
-
-    initial
-        $readmemh("lib/pico8.font.hex", font);
-
-    always @(*) 
-        bits = font[{ digit, line }];
-endmodule
-
 module segments_to_bitmap(
   input [6:0] segments,
   input [2:0] line,
