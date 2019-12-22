@@ -1,18 +1,26 @@
-VERILOG_FILES = video.v
+INCLUDE_FILES = lib/*.v
+TOP_LEVEL = video.v
 PCF_FILE = video.pcf
-
-bin/toplevel.json: ${VERILOG_FILES}
-	mkdir -p bin
-	yosys -q -p "synth_ice40 -json bin/toplevel.json" ${VERILOG_FILES}
-
-bin/toplevel.asc: ${PCF_FILE} bin/toplevel.json
-	nextpnr-ice40 --freq 25 --hx8k --package tq144:4k --json bin/toplevel.json --pcf ${PCF_FILE} --asc bin/toplevel.asc --opt-timing
+TARGET_FREQ = 50
 
 bin/toplevel.bin: bin/toplevel.asc
 	icepack bin/toplevel.asc bin/toplevel.bin
 
-.PHONY: time
-time: bin/toplevel.bin
+bin/toplevel.asc: ${PCF_FILE} bin/toplevel.json
+	nextpnr-ice40 --freq ${TARGET_FREQ} --hx8k --package tq144:4k \
+				  --json bin/toplevel.json --pcf ${PCF_FILE} \
+				  --asc bin/toplevel.asc --opt-timing
+
+bin/toplevel.json: ${TOP_LEVEL} ${INCLUDE_FILES}
+	mkdir -p bin
+	yosys -q -p "synth_ice40 -json bin/toplevel.json" ${TOP_LEVEL}
+
+.PHONY: stat
+stat: bin/toplevel.asc
+	icebox_stat -v bin/toplevel.asc
+
+.PHONY: timing
+timing: bin/toplevel.bin
 	icetime -tmd hx8k bin/toplevel.asc
 
 .PHONY: upload
