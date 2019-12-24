@@ -1,7 +1,8 @@
 `include "lib/video_scaler.v"
-`include "lib/hex_font.v"
+`include "lib/ascii_to_bitmap.v"
 
 module videotext #(
+    parameter COLUMNS = 40,
     parameter A = 10,
     parameter D = 8
   ) (
@@ -27,14 +28,19 @@ module videotext #(
     .vpos (vpos)
   );
 
-  wire [9:0] vaddr = (hpos >> 2) + ((vpos >> 3) * 'd40);
+  wire [9:0] vaddr = (hpos >> 2) + ((vpos >> 3) * COLUMNS);
   wire [3:0] bits;
 
-  digits_to_bitmap decoder(
+  ascii_to_bitmap font(
+    .clk(clk),
     .digit(dout),
     .line(vpos[2:0]),
     .bits(bits)
   ); 
 
-  wire pixel = (bits[~hpos[2:0]]) && display_on;
+  // The whitespace in the end of the font is allowing us the necessary cycles
+  // to display the font from memory without artifacts, at the cost of a slight 
+  // misaslignment. But, for an 8x8 font to work, we would need proper 
+  // pipelining of RAM access.
+  wire pixel = bits[4-hpos[3:0]] & display_on;
 endmodule

@@ -1,6 +1,7 @@
-module digits_to_bitmap #(
+module ascii_to_bitmap #(
     parameter FONT_ROM_FILENAME = "lib/pico8-hexadecimal.hex")  
-   (input [7:0] digit,
+   (input clk,
+    input [7:0] digit,
     input [2:0] line,
     output reg [3:0] bits);
 
@@ -9,6 +10,6 @@ module digits_to_bitmap #(
     initial
         $readmemh(FONT_ROM_FILENAME, font);
 
-    always @(*) 
-        bits = font[{ digit, line }];
+    always @(posedge clk) 
+        bits <= font[{ digit, line }];
 endmodule
