@@ -1,34 +1,25 @@
-`include "lib/video_scaler.v"
-`include "lib/hex_font.v"
+`include "lib/videotext.v"
+`include "lib/text_ram.v"
 
 module chip (input clk, output hsync, output vsync, output rgb);
-  assign rgb = pixel & display_on;
+  wire [7:0] dout;
+  wire [7:0] din;
+  wire [9:0] vaddr;
 
-  wire [7:0] hpos; 
-  wire [6:0] vpos;
-
-  video_scaler vga (
-    .clk (clk),
-    .reset (1'b0), 
+  videotext vtext(
+    .clk (clk), 
+    .dout (dout),
+    .vaddr (vaddr),
     .hsync (hsync), 
     .vsync (vsync), 
-    .display_on (display_on), 
-    .hpos (hpos), 
-    .vpos (vpos)
+    .pixel (rgb)
   );
 
-  wire [3:0] digit = hpos >> 2;
-  wire [2:0] xofs = hpos[2:0];
-  wire [2:0] yofs = vpos[2:0];
-  wire [3:0] bits;
-  
-  digits_to_bitmap decoder(
-    .digit(digit),
-    .line(yofs),
-    .bits(bits)
-  ); 
-
-  wire pixel = (bits[~xofs]);
-          // | (hpos == 0) | (vpos == 0) 
-          // | (hpos == 639) | (vpos == 479); 
+  text_ram vram(
+    .clk (clk),
+    .we (1'b0),
+    .addr (vaddr),
+    .din (din), 
+    .dout (dout)
+  );
 endmodule
